@@ -146,6 +146,12 @@ export function cullFaces(
     posMap: Map<string, BlockInfo>
 ): ModelElement[] {
     return elements.map((el): ModelElement => {
+        // X/Z element rotation can push faces outside the AABB, so we can't
+        // safely determine boundary alignment — skip culling entirely for these.
+        if (el.rotation && (el.rotation.axis === "x" || el.rotation.axis === "z")) {
+            return el;
+        }
+
         const newFaces = { ...el.faces };
 
         for (const dir of Object.keys(newFaces) as CubeFaceDirection[]) {

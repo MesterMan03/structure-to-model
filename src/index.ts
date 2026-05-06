@@ -67,7 +67,7 @@ function saveTintedTexturesToDisk(
     const namespace = colon >= 0 ? textureId.slice(0, colon) : "minecraft";
     const pathPrefix = colon >= 0 ? textureId.slice(colon + 1) : textureId;
 
-    const targetDir = path.join(packRoot, "assets", namespace, "textures", "item", pathPrefix);
+    const targetDir = path.join(packRoot, "assets", namespace, "textures", "block", pathPrefix);
     fs.mkdirSync(targetDir, { recursive: true });
 
     for (const tex of textures) {
@@ -107,7 +107,7 @@ function showSaveTintedDialog(textures: ReadonlySet<Texture>): void {
             },
             texture_id: {
                 label: "Target Texture Path",
-                description: "Namespace and path prefix, e.g. example:item/ship/test",
+                description: "Namespace and path prefix, e.g. example:ship/test",
                 type: "text",
                 value: getTintPath(),
             },
@@ -143,8 +143,8 @@ let settingsDialog: Dialog;
 BBPlugin.register("structure_to_model", {
     title: "Structure to Model",
     author: "Mester",
-    description: "Converts Minecraft structures (.nbt) into an item model.",
-    icon: "",
+    description: "Converts Minecraft Java structures (.nbt) into a model.",
+    icon: "account_balance",
     version: "1.0.0",
     variant: "desktop",
     onload,
