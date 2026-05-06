@@ -1,6 +1,20 @@
-import { read } from "nbtify";
+import { StructureImporter } from "./structure";
+import { buildStructure } from "./geometry";
 
-let parseAction: Action;
+const STORAGE_ASSET_ROOT = "stm_asset_root";
+const STORAGE_SCALE = "stm_scale";
+
+function getAssetRoot(): string {
+    return localStorage.getItem(STORAGE_ASSET_ROOT) ?? "";
+}
+
+function getScale(): number {
+    return Number(localStorage.getItem(STORAGE_SCALE) ?? "16");
+}
+
+let importAction: Action;
+let settingsAction: Action;
+let settingsDialog: Dialog;
 
 BBPlugin.register("structure_to_model", {
     title: "Structure to Model",
@@ -14,9 +28,44 @@ BBPlugin.register("structure_to_model", {
 });
 
 function onload() {
-    parseAction = new Action("stm_parse_nbt", {
-        name: "STM: Parse NBT to JSON",
-        description: "Debug: parse a .nbt structure file and write JSON next to it",
+    settingsDialog = new Dialog({
+        id: "stm_settings",
+        title: "Structure to Model Settings",
+        form: {
+            asset_root: {
+                label: "Asset Root",
+                description:
+                    "Path to the Minecraft assets folder (must contain blockstates/, models/, textures/)",
+                type: "folder",
+                value: getAssetRoot(),
+            },
+            scale: {
+                label: "Scale",
+                description:
+                    "Divide world coordinates by this value. Scale 16 = 16 blocks fit in one model unit.",
+                type: "number",
+                value: getScale(),
+                min: 1,
+                step: 1,
+            },
+        },
+        onConfirm(result) {
+            localStorage.setItem(STORAGE_ASSET_ROOT, result["asset_root"] as string);
+            localStorage.setItem(STORAGE_SCALE, String(result["scale"]));
+            Blockbench.showQuickMessage("Settings saved.");
+        },
+    });
+
+    settingsAction = new Action("stm_settings", {
+        name: "STM: Settings",
+        description: "Configure Structure to Model settings",
+        icon: "settings",
+        click: () => settingsDialog.show(),
+    });
+
+    importAction = new Action("stm_import", {
+        name: "STM: Import Structure",
+        description: "Import a .nbt structure file and convert it to a model",
         icon: "file_open",
         click: () => {
             Filesystem.importFile(
@@ -29,14 +78,31 @@ function onload() {
                     if (!files.length) return;
                     const file = files[0]!;
                     try {
-                        const nbt = await read(new Uint8Array(file.content as ArrayBuffer));
-                        const json = JSON.stringify(nbt, replacer, 2);
-                        const outputPath = file.path.replace(/\.nbt$/i, ".json");
-                        Filesystem.writeFile(outputPath, { content: json, savetype: "text" });
-                        Blockbench.showQuickMessage(`Written: ${outputPath}`);
+                        const assetRoot = getAssetRoot();
+                        if (!assetRoot) {
+                            Blockbench.showMessageBox({
+                                title: "Asset Root Not Set",
+                                message: "Set the asset root folder in Tools > STM: Settings before importing.",
+                            });
+                            return;
+                        }
+
+                        const scale = getScale();
+                        const structureName = file.name.replace(/\.nbt$/i, "");
+                        const data = await StructureImporter.fromBuffer(
+                            file.content as ArrayBuffer
+                        );
+
+                        Blockbench.showQuickMessage(
+                            `Building ${data.blocks.length} blocks…`
+                        );
+                        await buildStructure(structureName, data, assetRoot, scale);
+                        Blockbench.showQuickMessage(
+                            `Done: ${data.blocks.length} blocks · ${data.size.join("×")}`
+                        );
                     } catch (err) {
                         Blockbench.showMessageBox({
-                            title: "NBT Parse Error",
+                            title: "Structure Import Error",
                             message: String(err),
                         });
                     }
@@ -44,20 +110,12 @@ function onload() {
             );
         },
     });
-    MenuBar.addAction(parseAction, "tools");
+
+    MenuBar.addAction(importAction, "tools");
+    MenuBar.addAction(settingsAction, "tools");
 }
 
 function onunload() {
-    parseAction.delete();
-}
-
-function replacer(_key: string, value: unknown): unknown {
-    if (value instanceof Int8Array || value instanceof Int32Array) {
-        return Array.from(value as Iterable<number>);
-    }
-    if (value instanceof BigInt64Array) {
-        return Array.from(value, (v) => String(v));
-    }
-    if (typeof value === "bigint") return String(value);
-    return value;
+    importAction.delete();
+    settingsAction.delete();
 }
