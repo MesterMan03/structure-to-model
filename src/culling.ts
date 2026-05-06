@@ -27,6 +27,23 @@ export const TRANSPARENT_BLOCKS = new Set<string>([
     "minecraft:green_stained_glass",       "minecraft:green_stained_glass_pane",
     "minecraft:red_stained_glass",         "minecraft:red_stained_glass_pane",
     "minecraft:black_stained_glass",       "minecraft:black_stained_glass_pane",
+    // Trapdoors
+    "minecraft:oak_trapdoor", "minecraft:jungle_trapdoor",
+    "minecraft:acacia_trapdoor", "minecraft:mangrove_trapdoor",
+    "minecraft:cherry_trapdoor", "minecraft:bamboo_trapdoor",
+    "minecraft:crimson_trapdoor", "minecraft:warped_trapdoor",
+    "minecraft:iron_trapdoor", "minecraft:copper_trapdoor",
+    "minecraft:exposed_copper_trapdoor", "minecraft:weathered_copper_trapdoor",
+    "minecraft:oxidized_copper_trapdoor", "minecraft:waxed_copper_trapdoor",
+    "minecraft:waxed_exposed_copper_trapdoor", "minecraft:waxed_weathered_copper_trapdoor",
+    "minecraft:waxed_oxidized_copper_trapdoor",
+    // Leaves
+    "minecraft:oak_leaves", "minecraft:spruce_leaves",
+    "minecraft:birch_leaves", "minecraft:jungle_leaves",
+    "minecraft:acacia_leaves", "minecraft:dark_oak_leaves",
+    "minecraft:mangrove_leaves", "minecraft:mangrove_roots",
+    "minecraft:cherry_leaves", "minecraft:pale_oak_leaves",
+    "minecraft:azalea_leaves", "minecraft:flowering_azalea_leaves"
 ]);
 
 interface BlockInfo {
