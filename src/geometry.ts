@@ -6,7 +6,6 @@ import { getOrCreateTexture, getOrCreateTintedTexture, clearTintedTextures } fro
 import { buildPositionMap, cullFaces } from "./culling";
 import type { StructureData } from "./structure";
 
-const ALL_FACE_DIRS: CubeFaceDirection[] = ["north", "south", "east", "west", "up", "down"];
 
 export async function buildStructure(
     structureName: string,
@@ -92,12 +91,7 @@ async function makeCube(
     assetRoot: string,
     tintColor?: string
 ): Promise<Cube> {
-    // Explicitly set all six faces. Faces not defined in the model are disabled so
-    // Blockbench (and Minecraft) won't render them — matching Minecraft's own behaviour
-    // of omitting faces from element definitions.
-    const faceOptions: Record<CubeFaceDirection, CubeFaceOptions> =
-        Object.fromEntries(ALL_FACE_DIRS.map(d => [d, { enabled: false }])) as
-        Record<CubeFaceDirection, CubeFaceOptions>;
+    const faceOptions: Partial<Record<CubeFaceDirection, CubeFaceOptions>> = {};
 
     for (const dir of Object.keys(el.faces) as CubeFaceDirection[]) {
         const face = el.faces[dir]!;
@@ -110,7 +104,7 @@ async function makeCube(
             if (face.rotation !== undefined) opts.rotation = face.rotation;
             faceOptions[dir] = opts;
         } catch {
-            // leave face disabled if texture unavailable
+            // omit face entirely if texture unavailable
         }
     }
 
@@ -130,7 +124,11 @@ async function makeCube(
             r.axis === "z" ? r.angle : 0,
         ];
     }
-    return new Cube(options);
+    const cube = new Cube(options);
+    for (const dir of Object.keys(cube.faces) as CubeFaceDirection[]) {
+        if (!faceOptions[dir]) (cube.faces[dir] as any).texture = null;
+    }
+    return cube;
 }
 
 async function resolvePalette(
