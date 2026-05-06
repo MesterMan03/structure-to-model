@@ -4,6 +4,7 @@ export interface FaceData {
     texture: string;
     uv: [number, number, number, number];
     rotation?: number;
+    tintindex?: number;
 }
 
 export interface ElementRotation {
@@ -27,6 +28,7 @@ interface ModelJsonFace {
     uv?: number[];
     texture?: string;
     rotation?: number;
+    tintindex?: number;
 }
 
 interface ModelJsonElement {
@@ -112,6 +114,7 @@ function parseElement(e: ModelJsonElement, textures: Record<string, string>): Mo
             : autoUV(e.from, e.to, dir);
         const faceData: FaceData = { texture: resolved, uv };
         if (f.rotation !== undefined) faceData.rotation = f.rotation;
+        if (f.tintindex !== undefined) faceData.tintindex = f.tintindex;
         faces[dir as CubeFaceDirection] = faceData;
     }
 
