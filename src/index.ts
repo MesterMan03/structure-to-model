@@ -143,10 +143,13 @@ let settingsDialog: Dialog;
 BBPlugin.register("structure_to_model", {
     title: "Structure to Model",
     author: "Mester",
-    description: "Converts Minecraft Java structures (.nbt) into a model.",
     icon: "account_balance",
+    description: "Converts Minecraft Java structures (.nbt) into a model.",
     version: "1.0.0",
     variant: "desktop",
+    repository: "https://github.com/MesterMan03/structure-to-model",
+    bug_tracker: "https://github.com/MesterMan03/structure-to-model/issues",
+    creation_date: "2026/05/06",
     onload,
     onunload,
 });
