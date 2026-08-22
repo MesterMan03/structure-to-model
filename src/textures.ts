@@ -26,11 +26,11 @@ export function getOrCreateTexture(assetRoot: string, textureId: string): Textur
     return tex;
 }
 
-export async function getOrCreateTintedTexture(
+export function getOrCreateTintedTexture(
     assetRoot: string,
     textureId: string,
     hexColor: string
-): Promise<Texture> {
+): Texture {
     const absPath = texturePath(assetRoot, textureId);
     const cacheKey = `${absPath}|${hexColor}`;
     if (textureCache.has(cacheKey)) return textureCache.get(cacheKey)!;
@@ -42,9 +42,15 @@ export async function getOrCreateTintedTexture(
     const segments = textureId.split("/");
     const name = segments[segments.length - 1]!;
 
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => {
+    // Register and return the texture immediately so cube creation stays synchronous.
+    // The texture content is filled as soon as the source image has loaded.
+    const tex = new Texture({ name }).add(false);
+    tintedTextureSet.add(tex);
+    textureCache.set(cacheKey, tex);
+
+    const img = new Image();
+    img.onload = () => {
+        try {
             const canvas = document.createElement("canvas");
             canvas.width = img.naturalWidth;
             canvas.height = img.naturalHeight;
@@ -58,14 +64,13 @@ export async function getOrCreateTintedTexture(
                 d[i + 2] = (d[i + 2] ?? 0) * b;
             }
             ctx.putImageData(imageData, 0, 0);
-            resolve(canvas.toDataURL("image/png"));
-        };
-        img.onerror = () => reject(new Error(`Failed to tint: ${textureId}`));
-        img.src = original.source;
-    });
+            tex.fromDataURL(canvas.toDataURL("image/png"));
+        } catch (error) {
+            console.warn(`Failed to tint texture ${textureId}`, error);
+        }
+    };
+    img.onerror = () => console.warn(`Failed to load texture for tinting: ${textureId}`);
+    img.src = original.source;
 
-    const tex = new Texture({ name }).fromDataURL(dataUrl).add(false);
-    tintedTextureSet.add(tex);
-    textureCache.set(cacheKey, tex);
     return tex;
 }

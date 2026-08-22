@@ -48,13 +48,13 @@ export async function buildStructure(
             : entry.name;
 
         if (visibleEls.length === 1) {
-            (await makeCube(blockName, block.pos, visibleEls[0]!, scale, assetRoot, tintColor))
+            makeCube(blockName, block.pos, visibleEls[0]!, scale, assetRoot, tintColor)
                 .addTo(rootGroup).init();
         } else {
             const blockGroup = new Group({ name: blockName, origin: [0, 0, 0] });
             blockGroup.addTo(rootGroup).init();
             for (const el of visibleEls) {
-                (await makeCube(undefined, block.pos, el, scale, assetRoot, tintColor))
+                makeCube(undefined, block.pos, el, scale, assetRoot, tintColor)
                     .addTo(blockGroup).init();
             }
         }
@@ -83,14 +83,14 @@ function countFaces(elements: ModelElement[]): number {
     return elements.reduce((n, e) => n + Object.keys(e.faces).length, 0);
 }
 
-async function makeCube(
+function makeCube(
     name: string | undefined,
     blockPos: [number, number, number],
     el: ModelElement,
     scale: number,
     assetRoot: string,
     tintColor?: string
-): Promise<Cube> {
+): Cube {
     const faceOptions: Partial<Record<CubeFaceDirection, CubeFaceOptions>> = {};
 
     for (const dir of Object.keys(el.faces) as CubeFaceDirection[]) {
@@ -98,7 +98,7 @@ async function makeCube(
         try {
             const useTint = face.tintindex !== undefined && tintColor !== undefined;
             const tex = useTint
-                ? await getOrCreateTintedTexture(assetRoot, face.texture, tintColor!)
+                ? getOrCreateTintedTexture(assetRoot, face.texture, tintColor!)
                 : getOrCreateTexture(assetRoot, face.texture);
             const opts: CubeFaceOptions = { texture: tex, uv: face.uv, enabled: true };
             if (face.rotation !== undefined) opts.rotation = face.rotation;

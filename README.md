@@ -16,6 +16,7 @@ Import a Minecraft structure file (`.nbt`) into Blockbench and convert it into a
 
 ## Requirements
 
+- Blockbench 5.0.0 or newer
 - Blockbench Desktop (the plugin requires direct access to the filesystem to read assets and save tinted textures)
 - Minecraft assets folder arranged by namespace:
   - `<asset_root>/minecraft/blockstates/...`
