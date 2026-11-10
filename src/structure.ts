@@ -43,8 +43,8 @@ export class StructureImporter {
     }
 
     private static parsePaletteEntry(entry: CompoundTag): BlockState {
-        const name = String(entry["Name"]);
-        const propsTag = entry["Properties"] as CompoundTag | undefined;
+        const name = String(entry['Name'] ?? entry['id']);
+        const propsTag = (entry['Properties'] ?? entry['properties']) as CompoundTag | undefined;
         const properties: Record<string, string> = {};
         if (propsTag) {
             for (const [k, v] of Object.entries(propsTag)) {
