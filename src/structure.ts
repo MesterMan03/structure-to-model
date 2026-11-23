@@ -1,4 +1,4 @@
-import { read } from "nbtify";
+import { getTagType, read, TAG } from "nbtify";
 import type { CompoundTag } from "nbtify";
 
 export interface BlockState {
@@ -42,12 +42,18 @@ export class StructureImporter {
         return { size, palette, blocks };
     }
 
-    private static parsePaletteEntry(entry: CompoundTag): BlockState {
-        const name = String(entry['Name'] ?? entry['id']);
-        const propsTag = (entry['Properties'] ?? entry['properties']) as CompoundTag | undefined;
+    private static parsePaletteEntry(entry: CompoundTag, index: number): BlockState {
+        const name = entry["Name"] ?? entry["id"];
+        if (typeof name !== "string" || !/^(?:[a-z0-9_.-]+:)?[a-z0-9_./-]+$/.test(name)) {
+            throw new Error(`Invalid palette[${index}]: expected a block identifier in Name or id.`);
+        }
+        const propsTag = entry["Properties"] ?? entry["properties"];
         const properties: Record<string, string> = {};
-        if (propsTag) {
-            for (const [k, v] of Object.entries(propsTag)) {
+        if (propsTag !== undefined) {
+            if (getTagType(propsTag) !== TAG.COMPOUND) {
+                throw new Error(`Invalid palette[${index}] (${name}): properties must be an NBT compound.`);
+            }
+            for (const [k, v] of Object.entries(propsTag as CompoundTag)) {
                 if (v !== undefined) properties[k] = String(v);
             }
         }
