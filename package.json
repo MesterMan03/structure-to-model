@@ -4,6 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
+    "test": "bun test",
     "build": "bun build src/index.ts --outfile dist/structure_to_model.js --external blockbench-types --target=node --minify",
     "build:dev": "bun build src/index.ts --outfile dist/structure_to_model.js --external blockbench-types --target=node --sourcemap=inline"
   },
