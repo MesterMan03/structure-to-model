@@ -1,16 +1,18 @@
 {
   "name": "structure-to-model",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "build": "bun build src/index.ts --outfile dist/structure_to_model.js --external blockbench-types --target=node --minify",
+    "test": "bun test",
+    "build": "bun build src/index.ts --outfile dist/structure_to_model.js --external blockbench-types --target=node",
     "build:dev": "bun build src/index.ts --outfile dist/structure_to_model.js --external blockbench-types --target=node --sourcemap=inline"
   },
   "dependencies": {
     "nbtify": "^2.2.0"
   },
   "devDependencies": {
+    "@types/bun": "^1.4.5",
     "@types/node": "^25.6.0",
     "blockbench-types": "^5.1.0",
     "typescript": "^5.5.3"
