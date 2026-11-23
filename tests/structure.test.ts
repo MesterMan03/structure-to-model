@@ -1,10 +1,10 @@
 import { expect, test } from "bun:test";
-import { Int32, write } from "nbtify";
+import { Int32, write, type CompoundTag } from "nbtify";
 import { blockstatePath } from "../src/assets";
 import { StructureImporter } from "../src/structure";
 
-async function importPalette(palette) {
-    const ints = values => values.map(value => new Int32(value));
+async function importPalette(palette: CompoundTag[]) {
+    const ints = (values: number[]) => values.map(value => new Int32(value));
     const bytes = await write({
         size: ints([1, 1, 1]),
         palette,
@@ -16,10 +16,11 @@ async function importPalette(palette) {
 for (const [format, entry] of [
     ["legacy", { Name: "minecraft:oak_log", Properties: { axis: "x" } }],
     ["modern", { id: "minecraft:oak_log", properties: { axis: "x" } }],
-]) {
+] as const) {
     test(`${format} palette resolves the log and preserves its axis`, async () => {
         const { palette, blocks } = await importPalette([entry]);
-        const state = palette[blocks[0].state];
+        expect(blocks).toHaveLength(1);
+        const state = palette[blocks[0]!.state]!;
         expect(blockstatePath("assets", state.name)).toBe("assets/minecraft/blockstates/oak_log.json");
         expect(state.properties).toEqual({ axis: "x" });
     });
